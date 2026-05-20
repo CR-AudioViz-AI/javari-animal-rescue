@@ -4,7 +4,7 @@
 // CR AudioViz AI, LLC · EIN 39-3646201 · May 2026
 'use client'
 import { useState, useRef, useEffect } from 'react'
-import { ACTIONS, FIELDS } from '@/lib/tool-data'
+import { ACTIONS, getFields } from '@/lib/tool-data'
 
 
 export default function AnimalRescuePage() {
@@ -46,7 +46,7 @@ export default function AnimalRescuePage() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const fields = FIELDS[action.id]
+  const fields = getFields(action.id)
 
   return (
     <div style={{ background: '#0c0f0a', minHeight: '100vh', color: '#e8e2d4', fontFamily: 'Georgia, Times New Roman, serif' }}>
