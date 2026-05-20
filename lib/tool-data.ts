@@ -2,7 +2,7 @@
 // Tool definitions extracted from page.tsx to keep JSX parser clean
 // CR AudioViz AI · May 2026
 
-const ACTIONS = [
+export const ACTIONS = [
   { id: 'adoption_listing',  label: '🐕 Adoption Listing',   desc: 'Write a compelling adoption profile for an animal',       prompt: (v) => `Write a heartfelt, detailed adoption listing for: ${v.animalName || 'the animal'}, ${v.breed || ''}, ${v.age || ''}, personality: ${v.personality || ''}. Include their story, temperament, ideal home, and a compelling CTA.` },
   { id: 'grant_application', label: '📋 Grant Application',   desc: 'Write a full grant application for your rescue',           prompt: (v) => `Write a professional grant application for ${v.orgName || 'our animal rescue'} requesting funding for: ${v.purpose || 'rescue operations'}. Include mission statement, impact metrics, budget justification, and closing ask. Amount: $${v.amount || '5,000'}.` },
   { id: 'fundraising_email', label: '💌 Fundraising Email',   desc: 'Compelling donor email that converts',                     prompt: (v) => `Write a compelling fundraising email for ${v.orgName || 'our animal rescue'}. Campaign: ${v.campaign || 'general operations'}. Goal: $${v.goal || '1,000'}. Make it emotional, urgent, and specific with a clear CTA.` },
@@ -13,7 +13,7 @@ const ACTIONS = [
 ]
 
 
-const FIELDS = {
+export const FIELDS = {
   adoption_listing:  { label: 'Animal Details', fields: [{ id: 'animalName', label: 'Animal Name', placeholder: 'Bella' }, { id: 'breed', label: 'Breed', placeholder: 'Labrador Mix' }, { id: 'age', label: 'Age', placeholder: '2 years' }, { id: 'personality', label: 'Personality', placeholder: 'Playful, loves kids, house trained...' }] },
   grant_application: { label: 'Grant Details', fields: [{ id: 'orgName', label: 'Organization Name', placeholder: 'Happy Paws Rescue' }, { id: 'purpose', label: 'Purpose of Grant', placeholder: 'Medical care for injured animals' }, { id: 'amount', label: 'Amount Requested ($)', placeholder: '5000' }] },
   fundraising_email: { label: 'Campaign Details', fields: [{ id: 'orgName', label: 'Organization Name', placeholder: 'Happy Paws Rescue' }, { id: 'campaign', label: 'Campaign Name', placeholder: 'Winter Shelter Fund' }, { id: 'goal', label: 'Fundraising Goal ($)', placeholder: '2000' }] },
@@ -21,4 +21,8 @@ const FIELDS = {
   donation_appeal:   { label: 'Appeal Details', fields: [{ id: 'orgName', label: 'Organization Name', placeholder: 'Happy Paws Rescue' }, { id: 'situation', label: 'Situation', placeholder: 'Overcrowded shelter, 20 animals need homes by Friday' }] },
   volunteer_guide:   { label: 'Organization Details', fields: [{ id: 'orgName', label: 'Organization Name', placeholder: 'Happy Paws Rescue' }] },
   care_guide:        { label: 'Animal Details', fields: [{ id: 'animalName', label: 'Animal Name / Type', placeholder: 'Senior cat, 12 years old' }, { id: 'breed', label: 'Breed / Species', placeholder: 'Domestic Shorthair' }, { id: 'specialNeeds', label: 'Special Needs', placeholder: 'Diabetes, requires insulin twice daily' }] },
+}
+
+export function getFields(actionId) {
+  return FIELDS[actionId] || []
 }
