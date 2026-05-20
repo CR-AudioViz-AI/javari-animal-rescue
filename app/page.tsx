@@ -69,7 +69,7 @@ export default function AnimalRescuePage() {
   const fields = FIELDS[action.id]
 
   return (
-    <div style={{ background: '#0c0f0a', minHeight: '100vh', color: '#e8e2d4', fontFamily: '"Georgia", "Times New Roman", serif' }}>
+    <div style={{ background: '#0c0f0a', minHeight: '100vh', color: '#e8e2d4', fontFamily: 'Georgia, "Times New Roman", serif' }}>
       {/* NAV */}
       <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, background: 'rgba(12,15,10,0.97)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(180,160,120,0.15)', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px' }}>
         <a href="https://craudiovizai.com" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
@@ -147,7 +147,7 @@ export default function AnimalRescuePage() {
           </div>
           {output ? (
             <textarea ref={outputRef} value={output} readOnly
-              style={{ width: '100%', background: 'transparent', border: 'none', padding: '20px', color: '#e8e2d4', fontSize: 14, lineHeight: 1.75, fontFamily: '"Georgia", serif', resize: 'vertical', minHeight: 480, boxSizing: 'border-box', outline: 'none' }} />
+              style={{ width: '100%', background: 'transparent', border: 'none', padding: '20px', color: '#e8e2d4', fontSize: 14, lineHeight: 1.75, fontFamily: 'Georgia, serif', resize: 'vertical', minHeight: 480, boxSizing: 'border-box', outline: 'none' }} />
           ) : (
             <div style={{ padding: '60px 24px', textAlign: 'center' }}>
               <div style={{ fontSize: 40, marginBottom: 16 }}>{loading ? '⏳' : '🐾'}</div>
