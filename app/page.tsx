@@ -15,7 +15,7 @@ const ACTIONS = [
   { id: 'care_guide',        label: '🏥 Animal Care Guide',   desc: 'Detailed care instructions for a specific animal/breed',  prompt: (v: V) => `Write a complete care guide for ${v.animalName || 'this animal'} — ${v.breed || v.species || 'mixed breed'}. Include: feeding schedule, exercise needs, grooming, vet care, behavioral notes, and special needs: ${v.specialNeeds || 'none noted'}.` },
 ]
 
-type V = Record<string, string>
+interface V { [key: string]: string }
 
 const FIELDS: Record<string, { label: string; fields: Array<{ id: string; label: string; placeholder: string; type?: string }> }> = {
   adoption_listing:  { label: 'Animal Details', fields: [{ id: 'animalName', label: 'Animal Name', placeholder: 'Bella' }, { id: 'breed', label: 'Breed', placeholder: 'Labrador Mix' }, { id: 'age', label: 'Age', placeholder: '2 years' }, { id: 'personality', label: 'Personality', placeholder: 'Playful, loves kids, house trained...' }] },
@@ -29,7 +29,7 @@ const FIELDS: Record<string, { label: string; fields: Array<{ id: string; label:
 
 export default function AnimalRescuePage() {
   const [action, setAction] = useState(ACTIONS[0])
-  const [values, setValues] = useState<V>({})
+  const [values, setValues] = useState({})
   const [output, setOutput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
