@@ -1,112 +1,80 @@
-'use client'
-import { useState, useRef } from 'react'
-import { getActions, getFields } from '@/lib/tool-data'
+"use client";
+// app/page.tsx — Javari Animal Rescue
+// CR AudioViz AI · EIN 39-3646201 · May 2026
+import { useState } from "react";
 
-export default function AnimalRescuePage() {
-  const actions = getActions()
-  const [actionId, setActionId] = useState(actions[0].id)
-  const [values, setValues] = useState({})
-  const [output, setOutput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [copied, setCopied] = useState(false)
+const TOOLS = [{"icon": "\ud83d\udc9a", "label": "Grant Writer", "desc": "Find rescue-specific grants", "href": "https://craudiovizai.com/grants"}, {"icon": "\ud83d\udcf1", "label": "Social Posts", "desc": "Adoption posts that convert", "href": "/social"}, {"icon": "\ud83d\udc15", "label": "Pet Profile", "desc": "AI adoption bio writer", "href": "/profiles"}, {"icon": "\ud83d\udce7", "label": "Donor Email", "desc": "Fundraising campaigns", "href": "/email"}, {"icon": "\ud83d\udccb", "label": "Intake Form", "desc": "Smart intake questionnaires", "href": "/intake"}, {"icon": "\u2764\ufe0f", "label": "Success Story", "desc": "Tell your rescue stories", "href": "/stories"}];
 
-  function setV(id, val) { setValues(p => ({ ...p, [id]: val })) }
+export default function HomePage() {
+  const [input, setInput] = useState("");
+  const [output, setOutput] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function generate() {
-    const action = actions.find(a => a.id === actionId)
-    if (!action) return
-    setLoading(true); setError(''); setOutput('')
+    if (!input.trim()) return;
+    setLoading(true); setOutput("");
     try {
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: actionId, input: action.buildPrompt(values) }),
-      })
-      const data = await res.json()
-      if (!res.ok || data.error) throw new Error(data.error || 'Generation failed')
-      setOutput(data.result || '')
-    } catch (e) { setError(e.message || 'Something went wrong') }
-    setLoading(false)
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [{ role: "user", content: input }],
+          stream: false,
+          systemOverride: "You are an expert at writing compelling pet adoption bios that get animals adopted. Write emotionally engaging, specific bios that highlight personality and match pets to families.",
+        }),
+      });
+      const data = await res.json();
+      setOutput(data?.choices?.[0]?.message?.content || data?.content || "Error.");
+    } catch { setOutput("Connection error."); }
+    setLoading(false);
   }
 
-  const action = actions.find(a => a.id === actionId)
-  const fields = getFields(actionId)
-
   return (
-    <div style={{ background: '#0c0f0a', minHeight: '100vh', color: '#e8e2d4', fontFamily: 'Georgia, serif' }}>
-      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, background: 'rgba(12,15,10,0.97)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(180,160,120,0.15)', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px' }}>
-        <a href="https://craudiovizai.com" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <span style={{ fontSize: 22 }}>🐾</span>
-          <span style={{ fontWeight: 700, fontSize: 17, color: '#d4a853', letterSpacing: '-0.02em' }}>Javari Animal Rescue</span>
-        </a>
-        <a href="https://craudiovizai.com/auth/signup" style={{ background: 'linear-gradient(135deg,#d4a853,#a0522d)', color: '#0c0f0a', borderRadius: 8, padding: '8px 18px', fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>Free Access</a>
+    <div style={{ minHeight:"100vh", background:"#040912", color:"#e2e8f0", fontFamily:"system-ui" }}>
+      <nav style={{ background:"#1E3A5F", padding:"0 20px", height:52, display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0, zIndex:100 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+          <span style={{ fontSize:20 }}>🐾</span>
+          <span style={{ fontWeight:800, color:"#FF0800", fontSize:15 }}>Javari Animal Rescue</span>
+        </div>
+        <a href="https://craudiovizai.com/auth/signup" style={{ background:"#FF0800", color:"#fff", borderRadius:7, padding:"5px 14px", fontSize:12, fontWeight:700, textDecoration:"none" }}>Sign Up Free</a>
       </nav>
-      <div style={{ height: 60 }} />
-      <section style={{ textAlign: 'center', padding: '52px 24px 36px', maxWidth: 700, margin: '0 auto' }}>
-        <div style={{ fontSize: 52, marginBottom: 10 }}>🐾</div>
-        <h1 style={{ fontSize: 'clamp(26px,4vw,44px)', fontWeight: 700, margin: '0 0 12px', color: '#e8e2d4' }}>AI Tools for Animal Rescues</h1>
-        <p style={{ fontSize: 16, color: '#9c8f78', maxWidth: 500, margin: '0 auto 6px', lineHeight: 1.65, fontFamily: 'system-ui' }}>Grant applications, adoption listings, fundraising emails, and more. <strong style={{ color: '#d4a853' }}>Always free for registered rescues.</strong></p>
-        <p style={{ color: '#5a5248', fontSize: 12, fontFamily: 'system-ui' }}>Powered by Javari AI · DeepSeek + Llama 3.3</p>
+      <section style={{ background:"linear-gradient(135deg,#1E3A5F,#040912)", padding:"56px 24px 48px", textAlign:"center" }}>
+        <div style={{ maxWidth:640, margin:"0 auto" }}>
+          <h1 style={{ fontSize:"clamp(24px,4vw,44px)", fontWeight:900, color:"#fff", margin:"0 0 12px", lineHeight:1.05 }}>AI Tools for<br /><span style={{ color:"#FF0800" }}>Animal Rescues</span></h1>
+          <p style={{ color:"rgba(255,255,255,0.7)", fontSize:15, lineHeight:1.65, margin:0 }}>Grant writing, social media, adoption listings, and fundraising for rescues and shelters.</p>
+        </div>
       </section>
-      <section style={{ maxWidth: 960, margin: '0 auto', padding: '0 20px 80px', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1.4fr)', gap: 20 }}>
-        <div>
-          <div style={{ background: '#131710', border: '1px solid rgba(180,160,120,0.1)', borderRadius: 14, overflow: 'hidden', marginBottom: 16 }}>
-            <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(180,160,120,0.08)', fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: '#6b5f4e', fontFamily: 'system-ui', textTransform: 'uppercase' }}>Choose Tool</div>
-            {actions.map(a => (
-              <button key={a.id} onClick={() => { setActionId(a.id); setValues({}); setOutput('') }}
-                style={{ width: '100%', textAlign: 'left', padding: '11px 16px', background: actionId === a.id ? 'rgba(212,168,83,0.12)' : 'transparent', borderLeft: actionId === a.id ? '3px solid #d4a853' : '3px solid transparent', border: 'none', cursor: 'pointer', borderBottom: '1px solid rgba(180,160,120,0.06)', display: 'block' }}>
-                <div style={{ fontWeight: 600, fontSize: 13, color: actionId === a.id ? '#d4a853' : '#c8bca8', fontFamily: 'system-ui' }}>{a.label}</div>
-                <div style={{ fontSize: 11, color: '#6b5f4e', marginTop: 2, fontFamily: 'system-ui' }}>{a.desc}</div>
-              </button>
-            ))}
-          </div>
-          <div style={{ background: '#131710', border: '1px solid rgba(180,160,120,0.1)', borderRadius: 14, padding: '16px' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: '#6b5f4e', fontFamily: 'system-ui', textTransform: 'uppercase', marginBottom: 14 }}>{fields.label || 'Details'}</div>
-            {(fields.fields || []).map(f => (
-              <div key={f.id} style={{ marginBottom: 12 }}>
-                <label style={{ display: 'block', fontSize: 12, color: '#9c8f78', marginBottom: 5, fontFamily: 'system-ui', fontWeight: 500 }}>{f.label}</label>
-                {f.type === 'textarea' ? (
-                  <textarea value={values[f.id] || ''} onChange={e => setV(f.id, e.target.value)} placeholder={f.placeholder} rows={3}
-                    style={{ width: '100%', background: '#0c0f0a', border: '1px solid rgba(180,160,120,0.15)', borderRadius: 8, padding: '9px 12px', color: '#e8e2d4', fontSize: 13, fontFamily: 'system-ui', resize: 'vertical', boxSizing: 'border-box', outline: 'none' }} />
-                ) : (
-                  <input value={values[f.id] || ''} onChange={e => setV(f.id, e.target.value)} placeholder={f.placeholder}
-                    style={{ width: '100%', background: '#0c0f0a', border: '1px solid rgba(180,160,120,0.15)', borderRadius: 8, padding: '9px 12px', color: '#e8e2d4', fontSize: 13, fontFamily: 'system-ui', boxSizing: 'border-box', outline: 'none' }} />
-                )}
-              </div>
-            ))}
-            <button onClick={generate} disabled={loading}
-              style={{ width: '100%', background: loading ? '#3a3020' : 'linear-gradient(135deg,#d4a853,#a0522d)', color: loading ? '#6b5f4e' : '#0c0f0a', border: 'none', borderRadius: 10, padding: '12px', fontSize: 14, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', fontFamily: 'system-ui', marginTop: 4 }}>
-              {loading ? 'Generating...' : 'Generate ' + (action ? action.label : '')}
+      <section style={{ maxWidth:720, margin:"0 auto", padding:"28px 20px 0" }}>
+        <div style={{ background:"#0F1F32", border:"1px solid rgba(0,180,216,0.12)", borderRadius:14, padding:"20px 24px" }}>
+          <h2 style={{ margin:"0 0 12px", fontSize:15, fontWeight:700, color:"#fff" }}>Write Adoption Bio</h2>
+          <div style={{ display:"flex", gap:8 }}>
+            <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&generate()}
+              placeholder="Describe the animal (name, age, breed, personality)..."
+              style={{ flex:1, background:"#172D48", border:"1px solid rgba(0,180,216,0.15)", borderRadius:8, padding:"10px 12px", color:"#e2e8f0", fontSize:13, outline:"none", fontFamily:"system-ui" }} />
+            <button onClick={generate} disabled={loading||!input.trim()}
+              style={{ background:loading||!input.trim()?"#0F1F32":"#1E3A5F", color:loading||!input.trim()?"#374151":"#FF0800", border:"1px solid rgba(0,180,216,0.2)", borderRadius:8, padding:"10px 18px", fontSize:13, fontWeight:700, cursor:loading||!input.trim()?"not-allowed":"pointer", fontFamily:"system-ui" }}>
+              {loading?"...":"Go"}
             </button>
-            {error && <p style={{ color: '#ef4444', fontSize: 12, marginTop: 8, fontFamily: 'system-ui' }}>⚠ {error}</p>}
           </div>
-        </div>
-        <div style={{ background: '#131710', border: '1px solid rgba(180,160,120,0.1)', borderRadius: 14, overflow: 'hidden', position: 'sticky', top: 80, alignSelf: 'start' }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(180,160,120,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: '#6b5f4e', fontFamily: 'system-ui', textTransform: 'uppercase' }}>Generated Output</span>
-            {output && (
-              <button onClick={() => { navigator.clipboard.writeText(output); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
-                style={{ background: copied ? 'rgba(212,168,83,0.2)' : 'rgba(180,160,120,0.1)', border: '1px solid rgba(180,160,120,0.2)', color: copied ? '#d4a853' : '#9c8f78', borderRadius: 6, padding: '4px 10px', fontSize: 11, cursor: 'pointer', fontFamily: 'system-ui' }}>
-                {copied ? 'Copied!' : 'Copy'}
-              </button>
-            )}
-          </div>
-          {output ? (
-            <textarea value={output} readOnly style={{ width: '100%', background: 'transparent', border: 'none', padding: '18px', color: '#e8e2d4', fontSize: 14, lineHeight: 1.75, resize: 'vertical', minHeight: 460, boxSizing: 'border-box', outline: 'none', fontFamily: 'Georgia, serif' }} />
-          ) : (
-            <div style={{ padding: '60px 20px', textAlign: 'center' }}>
-              <div style={{ fontSize: 36, marginBottom: 12 }}>{loading ? '⏳' : '🐾'}</div>
-              <p style={{ color: '#3d3830', fontSize: 13, fontFamily: 'system-ui', lineHeight: 1.6 }}>
-                {loading ? 'Writing your content...' : 'Select a tool, fill in details, and click Generate.\nFree for registered rescues.'}
-              </p>
-            </div>
-          )}
+          {output && <div style={{ marginTop:14, padding:"12px 14px", background:"rgba(0,180,216,0.05)", border:"1px solid rgba(0,180,216,0.1)", borderRadius:8 }}>
+            <pre style={{ margin:0, fontSize:13, color:"#e2e8f0", lineHeight:1.65, whiteSpace:"pre-wrap", fontFamily:"system-ui", maxHeight:320, overflowY:"auto" }}>{output}</pre>
+          </div>}
         </div>
       </section>
-      <footer style={{ background: '#080b07', borderTop: '1px solid rgba(180,160,120,0.06)', padding: '24px', textAlign: 'center' }}>
-        <p style={{ color: '#1a1510', fontSize: 11, fontFamily: 'system-ui', margin: 0 }}>© 2026 CR AudioViz AI, LLC — EIN: 39-3646201 · Fort Myers, Florida · Your Story. Our Design. Everyone Connects. Everyone Wins.</p>
+      <section style={{ maxWidth:960, margin:"0 auto", padding:"36px 20px 72px" }}>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))", gap:12 }}>
+          {TOOLS.map((t:any) => (
+            <a key={t.href} href={t.href} style={{ background:"#0F1F32", border:"1px solid rgba(0,180,216,0.08)", borderRadius:14, padding:"18px 16px", textDecoration:"none", display:"block" }}>
+              <span style={{ fontSize:26, display:"block", marginBottom:8 }}>{t.icon}</span>
+              <div style={{ fontWeight:700, fontSize:13, color:"#e2e8f0", marginBottom:4 }}>{t.label}</div>
+              <div style={{ fontSize:11, color:"#6B7280", lineHeight:1.4 }}>{t.desc}</div>
+            </a>
+          ))}
+        </div>
+      </section>
+      <footer style={{ borderTop:"1px solid rgba(0,180,216,0.08)", padding:"12px 24px", textAlign:"center" }}>
+        <p style={{ color:"#374151", fontSize:11, margin:0 }}>© 2026 CR AudioViz AI, LLC — EIN: 39-3646201 · <a href="https://craudiovizai.com/auth/signup" style={{ color:"#FF0800", textDecoration:"none", fontWeight:600 }}>Sign Up Free</a></p>
       </footer>
     </div>
-  )
+  );
 }
