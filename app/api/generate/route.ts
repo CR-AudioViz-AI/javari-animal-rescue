@@ -1,51 +1,81 @@
 // app/api/generate/route.ts — javari-animal-rescue
-// FREE for social impact users
-// Powered by Javari AI free models
+// 8 specialized AI tools for animal rescue organizations
+// FREE tier — powered by Groq (fastest free LLM inference)
+// Competitor advantages over PetPoint, Shelterluv, DonorPerfect
+// CR AudioViz AI · EIN 39-3646201 · June 2026
 import { NextRequest, NextResponse } from 'next/server'
 export const dynamic = 'force-dynamic'
-export const runtime = 'nodejs'
 export const maxDuration = 60
 
-const GROQ_API_KEY   = process.env.GROQ_API_KEY   ?? ''
-const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY ?? ''
-const CREDIT_COST    = 0
-const SYSTEM         = `You are an animal welfare specialist for CR AudioViz AI. Help animal rescues with adoption listings, volunteer coordination, fundraising content, grant applications, social media, and animal care guides.`
-const ACTIONS        = ["adoption_listing", "fundraising_email", "grant_application", "volunteer_guide", "care_guide", "social_media_post", "donation_appeal"]
+const GROQ_KEY = process.env.GROQ_API_KEY ?? process.env.OPENROUTER_API_KEY ?? ''
 
-async function generate(prompt: string): Promise<string> {
-  if (OPENROUTER_KEY) {
-    try {
-      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENROUTER_KEY}`, 'HTTP-Referer': 'https://craudiovizai.com' },
-        body: JSON.stringify({ model: 'deepseek/deepseek-v4-flash:free', max_tokens: 2048, temperature: 0.7, messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: prompt }] }),
+async function callGroq(system: string, user: string): Promise<string> {
+  // Try Groq first (fastest, free)
+  if (process.env.GROQ_API_KEY) {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json', 'Authorization':`Bearer ${process.env.GROQ_API_KEY}`},
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{role:'system',content:system},{role:'user',content:user}],
+        max_tokens: 1200, temperature: 0.7,
       })
-      if (res.ok) { const d = await res.json() as { choices?: Array<{ message?: { content?: string } }> }; const t = d.choices?.[0]?.message?.content ?? ''; if (t.length > 50) return t }
-    } catch { /* fall through */ }
+    })
+    const d = await res.json() as {choices?:{message:{content:string}}[]}
+    if (d.choices?.[0]?.message?.content) return d.choices[0].message.content
   }
-  if (!GROQ_API_KEY) throw new Error('AI service unavailable')
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${GROQ_API_KEY}` },
-    body: JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 2048, temperature: 0.7, messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: prompt }] }),
-  })
-  if (!res.ok) throw new Error(`Groq HTTP ${res.status}`)
-  const d = await res.json() as { choices?: Array<{ message?: { content?: string } }> }
-  return d.choices?.[0]?.message?.content ?? ''
+  // Fallback: OpenRouter
+  if (process.env.OPENROUTER_API_KEY) {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json', 'Authorization':`Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'HTTP-Referer':'https://craudiovizai.com','X-Title':'Javari Animal Rescue'},
+      body: JSON.stringify({
+        model: 'meta-llama/llama-3.3-70b-instruct:free',
+        messages: [{role:'system',content:system},{role:'user',content:user}],
+        max_tokens: 1200,
+      })
+    })
+    const d = await res.json() as {choices?:{message:{content:string}}[]}
+    if (d.choices?.[0]?.message?.content) return d.choices[0].message.content
+  }
+  throw new Error('No AI provider available')
 }
 
-export async function GET() {
-  return NextResponse.json({ actions: ACTIONS, cost: CREDIT_COST === 0 ? 'FREE' : CREDIT_COST + ' credits', model: 'Javari AI (free models)', cost_usd: '$0.00' })
+const SYSTEM = `You are Javari, an expert AI assistant for animal rescue organizations, shelters, and foster networks. You help with adoptions, fundraising, grant writing, volunteer management, and animal care. Your content is compassionate, professional, and optimized to get animals adopted and organizations funded. Always produce ready-to-use content — no placeholders, no instructions needed.`
+
+function buildPrompt(action: string, fields: Record<string,string>): string {
+  const f = (k: string) => fields[k] ?? ''
+  const prompts: Record<string, string> = {
+    adoption: `Write a compelling adoption bio for ${f('Animal Name')}, a ${f('Species/Breed')}, ${f('Age')} old. Personality: ${f('Personality')}. Background: ${f('Special needs or story')}. Make it emotional, vivid, and end with a clear call-to-action. Use sub-headers. 350-500 words.`,
+    
+    grant: `Write a complete grant application for ${f('Organization name')} requesting ${f('Grant amount needed')} to fund: ${f('Program to fund')}. They help ${f('Annual animals helped')} animals annually. Mission: ${f('Mission statement')}. Include: Executive Summary, Statement of Need, Program Description, Goals & Outcomes, Budget Narrative, Organizational Capacity. 600-800 words.`,
+    
+    donor: `Write a fundraising email to ${f('Donor name')} asking for ${f('Donation ask')} for ${f('Rescue name')}. Urgency: ${f('Urgency')}. Impact story: ${f('Impact story')}. Make it emotional but not manipulative. Include: compelling subject line (3 options), personalized opening, impact story, specific ask, easy response options. Ready to send.`,
+    
+    social: `Write 3 social media posts for ${f('Animal Name')}, a ${f('Species/breed')} with this personality: ${f('Personality')}. Located at ${f('Rescue location')}. Platform: ${f('Platform')}. Each post: emoji-rich, call-to-action, relevant hashtags (15 max), optimized for shares. Label each post clearly.`,
+    
+    volunteer: `Write a volunteer recruitment package for ${f('Rescue name')} seeking: ${f('Role needed')}. Commitment: ${f('Commitment')}. Responsibilities: ${f('What they do')}. Benefits: ${f('Benefits')}. Include: Job title + description, Requirements (light), What you'll do, Perks & recognition, How to apply CTA. Make it exciting and warm.`,
+    
+    care: `Write a detailed care guide for: ${f('Animal/species')}. Situation: ${f('Situation')}. Questions to answer: ${f('Questions')}. Include: Feeding schedule, Housing/environment, Health monitoring, Socialization, Red flags to watch, When to contact vet, Resources. Make it practical for a first-time foster.`,
+    
+    newsletter: `Write a monthly rescue newsletter for ${f('Month/theme')} for ${f('Rescue name')}. Success stories: ${f('Success stories')}. Upcoming events: ${f('Upcoming events')}. Urgent needs: ${f('Urgent needs')}. Include: Subject line (3 options), warm opener, success spotlight, urgent needs section, events calendar, donation CTA, closing. ~500 words.`,
+    
+    policy: `Draft a professional ${f('Document type')} for ${f('Organization name')} in ${f('State')}. Special requirements: ${f('Special clauses')}. Make it legally sound (note: not legal advice), comprehensive, and protect both the organization and the animals. Include all standard clauses plus the requested special terms.`,
+  }
+  return prompts[action] ?? `Generate professional content for animal rescue: action=${action}, details=${JSON.stringify(fields)}`
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest): Promise<Response> {
   try {
-    const body = await req.json() as { action: string; input: string; context?: Record<string, string> }
-    if (!body.input?.trim()) return NextResponse.json({ error: 'input required' }, { status: 400 })
-    if (!ACTIONS.includes(body.action)) return NextResponse.json({ error: 'invalid action', available: ACTIONS }, { status: 400 })
-    const result = await generate(`${body.action.replace(/_/g,' ')}: ${body.input}`)
-    return NextResponse.json({ result, action: body.action, cost_usd: '$0.00', credits_used: CREDIT_COST, free: CREDIT_COST === 0 })
-  } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 })
+    const body = await req.json() as {action:string; fields:Record<string,string>}
+    const { action, fields } = body
+    if (!action) return NextResponse.json({error:'action required'},{status:400})
+    const prompt = buildPrompt(action, fields)
+    const result = await callGroq(SYSTEM, prompt)
+    return NextResponse.json({result, action, generated_at: new Date().toISOString()})
+  } catch(e) {
+    console.error('Generate error:', e)
+    return NextResponse.json({error:'Generation failed — please try again'},{status:500})
   }
 }
