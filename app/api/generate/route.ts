@@ -4,6 +4,7 @@
 // Competitor advantages over PetPoint, Shelterluv, DonorPerfect
 // CR AudioViz AI · EIN 39-3646201 · June 2026
 import { NextRequest, NextResponse } from 'next/server'
+import { requireCredits } from '@/lib/credits-check'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 
@@ -71,6 +72,14 @@ export async function POST(req: NextRequest): Promise<Response> {
     const body = await req.json() as {action:string; fields:Record<string,string>}
     const { action, fields } = body
     if (!action) return NextResponse.json({error:'action required'},{status:400})
+
+    // Fixed 2026-07-31, per Roy: every app ties into the shared platform
+    // credit system, no exceptions - this tool was previously running fully
+    // free, unlimited, and unauthenticated despite this exact check already
+    // being written and sitting unused in lib/credits-check.ts.
+    const check = await requireCredits(req, 5, `animal_rescue_${action}`)
+    if (!check.allowed) return check.response!
+
     const prompt = buildPrompt(action, fields)
     const result = await callGroq(SYSTEM, prompt)
     return NextResponse.json({result, action, generated_at: new Date().toISOString()})
