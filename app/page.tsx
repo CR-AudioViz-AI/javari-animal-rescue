@@ -13,7 +13,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { AuthButtons } from "@/components/brand/AuthButtons";
 import { CreditsBar } from "@/components/brand/CreditsBar";
-import { JavariWidget } from "@/components/javari-widget/JavariWidget";
+import JavariWidget from "@/components/javari-widget/JavariWidget";
 import { supabase } from "@/lib/supabase";
 
 const TOOLS = [
