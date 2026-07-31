@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 type Rescue = { id: string; name: string; slug: string; city: string; state: string
-  description: string | null; logo_url: string | null; plan: string; verified: boolean }
+  description: string | null; logo_url: string | null; featured: boolean; verified: boolean }
 
 export default function DirectoryPage() {
   const [rescues, setRescues] = useState<Rescue[]>([])
@@ -62,7 +62,13 @@ export default function DirectoryPage() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🐾</div>
                 )}
                 <div>
-                  <div style={{ fontWeight: 700 }}>{r.name} {r.verified && '✅'}</div>
+                  <div style={{ fontWeight: 700 }}>
+                    {r.name} {r.verified && '✅'}
+                    {r.featured && (
+                      <span style={{ marginLeft: 8, fontSize: 10, padding: '2px 8px', borderRadius: 999,
+                        background: 'rgba(0,212,255,0.15)', color: '#00D4FF' }}>Featured</span>
+                    )}
+                  </div>
                   <div style={{ fontSize: 12, color: '#607090' }}>{r.city}, {r.state}</div>
                   {r.description && <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 4 }}>{r.description.slice(0, 100)}</div>}
                 </div>

@@ -13,7 +13,7 @@ type Rescue = {
   description: string | null; mission: string | null; logo_url: string | null
   cover_url: string | null; social_facebook: string | null; social_instagram: string | null
   social_tiktok: string | null; animals_served: string[] | null; nonprofit: boolean
-  verified: boolean; plan: string
+  verified: boolean
 }
 
 export default function RescueProfilePage() {
