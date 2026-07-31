@@ -307,7 +307,7 @@ export default function AnimalRescuePage() {
             {n:"FREE", d:"Always free for rescues"},
             {n:"8 Tools", d:"All animal welfare needs"},
             {n:"AI-Powered", d:"Groq + Javari intelligence"},
-            {n:"No Login", d:"Start generating instantly"},
+            {n:"One Account", d:"Same login as the whole platform"},
           ].map((s,i) => (
             <div key={i} style={{padding:"12px", background:C.card,
               border:"1px solid rgba(255,255,255,0.06)", borderRadius:10,
