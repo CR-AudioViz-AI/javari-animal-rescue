@@ -39,21 +39,17 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   const { data: planRow } = await sb.from("rescue_org_plans").select("*").eq("plan", body.plan).maybeSingle();
   if (!planRow) return NextResponse.json({ error: "Unknown plan" }, { status: 400 });
+  if (!planRow.stripe_price_id) return NextResponse.json({ error: "Plan is not yet configured for checkout" }, { status: 500 });
 
   const origin = req.headers.get("origin") ?? "https://javarirescue.com";
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     customer: rescue.stripe_customer_id ?? undefined,
     customer_email: rescue.stripe_customer_id ? undefined : user.email,
-    line_items: [{
-      price_data: {
-        currency: "usd",
-        unit_amount: planRow.monthly_cents,
-        recurring: { interval: "month" },
-        product_data: { name: `${planRow.name} — Rescue Network Plan for ${rescue.name}` },
-      },
-      quantity: 1,
-    }],
+    // Fixed 2026-07-31: was using inline price_data (ad-hoc, unregistered
+    // pricing) instead of a real Stripe Price - every plan now has a real
+    // Product and Price registered in Stripe, referenced here directly.
+    line_items: [{ price: planRow.stripe_price_id, quantity: 1 }],
     success_url: `${origin}/rescue/manage?checkout=success`,
     cancel_url: `${origin}/rescue/manage?checkout=canceled`,
     metadata: { rescue_id: rescue.id, plan: body.plan },
