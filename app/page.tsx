@@ -3,7 +3,18 @@
 // AI-powered tools for animal shelters, rescues, and foster networks
 // Beats: Petfinder tools, DonorPerfect, PetPoint, Shelterluv content tools
 // CR AudioViz AI · EIN 39-3646201 · June 2026
-import { useState, useCallback } from "react";
+//
+// Fixed 2026-07-31: AuthButtons, CreditsBar, and JavariWidget existed in this
+// repo, fully built, and were never actually rendered anywhere - a user had
+// no visible way to log in, see their balance, or get support. Separately,
+// generate() never attached an auth token to its request at all, meaning
+// even a logged-in user would always be rejected once credits enforcement
+// was turned on. Both fixed together here.
+import { useState, useCallback, useEffect } from "react";
+import { AuthButtons } from "@/components/brand/AuthButtons";
+import { CreditsBar } from "@/components/brand/CreditsBar";
+import { JavariWidget } from "@/components/javari-widget/JavariWidget";
+import { supabase } from "@/lib/supabase";
 
 const TOOLS = [
   { id:"adoption",   icon:"🐾", label:"Adoption Bio Writer",    desc:"Compelling pet profiles that get animals adopted faster",   color:"#10B981" },
@@ -84,23 +95,73 @@ export default function AnimalRescuePage() {
   const [loading, setLoading] = useState(false);
   const [copied,  setCopied]  = useState(false);
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName]     = useState<string | undefined>(undefined);
+  const [userEmail, setUserEmail]   = useState<string | undefined>(undefined);
+  const [authToken, setAuthToken]   = useState<string | undefined>(undefined);
+  const [credits, setCredits]       = useState<number | undefined>(undefined);
+  const [plan, setPlan]             = useState<'free'|'pro'|'business'>('free');
+
+  const loadBalance = useCallback(async (token: string) => {
+    try {
+      const res = await fetch("https://craudiovizai.com/api/credits/balance", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const d = await res.json() as { balance?: number; tier?: string };
+      if (res.ok) { setCredits(d.balance ?? 0); setPlan((d.tier as 'free'|'pro'|'business') ?? 'free'); }
+    } catch { /* leave credits undefined - CreditsBar handles that gracefully */ }
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      // Real session from this app's own Supabase client (module-level
+      // singleton, same real Supabase project every other app shares) -
+      // NOT the cookie-based CentralAuth.getSession(), which relies on
+      // third-party cookies that modern browsers increasingly block
+      // cross-domain and which this project's User type doesn't even
+      // expose an access_token from.
+      const { data } = await supabase.auth.getSession();
+      const session = data.session;
+      if (session?.user) {
+        setIsLoggedIn(true);
+        setUserName(session.user.user_metadata?.name ?? session.user.email ?? undefined);
+        setUserEmail(session.user.email ?? undefined);
+        setAuthToken(session.access_token);
+        await loadBalance(session.access_token);
+      }
+    })();
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session?.user);
+      setUserName(session?.user?.user_metadata?.name ?? session?.user?.email ?? undefined);
+      setUserEmail(session?.user?.email ?? undefined);
+      setAuthToken(session?.access_token);
+      if (session?.access_token) void loadBalance(session.access_token);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, [loadBalance]);
+
   const tool = TOOLS.find(t => t.id === active);
   const toolFields = active ? (TOOL_FIELDS[active] ?? []) : [];
 
   const generate = useCallback(async () => {
     if (!active) return;
+    if (!authToken) { setResult("Please log in to use this tool."); return; }
     setLoading(true); setResult("");
     try {
       const res = await fetch("/api/generate", {
         method:"POST",
-        headers:{"Content-Type":"application/json"},
+        headers:{"Content-Type":"application/json", "Authorization": `Bearer ${authToken}`},
         body: JSON.stringify({ action: active, fields }),
       });
       const d = await res.json() as {result?:string; error?:string};
       setResult(d.result ?? d.error ?? "Error");
+      if (res.ok && authToken) {
+        await loadBalance(authToken);
+      }
     } catch(e) { setResult("Network error. Please try again."); }
     setLoading(false);
-  }, [active, fields]);
+  }, [active, fields, authToken, loadBalance]);
 
   const copy = useCallback(async () => {
     await navigator.clipboard.writeText(result);
@@ -124,13 +185,12 @@ export default function AnimalRescuePage() {
             AI-powered tools for shelters, rescues & foster networks · Powered by CR AudioViz AI
           </p>
         </div>
-        <a href="https://craudiovizai.com" target="_blank" rel="noopener noreferrer"
-          style={{padding:"8px 16px", borderRadius:8,
-            background:"linear-gradient(135deg,#00D4FF,#10B981)",
-            color:"#000", fontWeight:800, fontSize:11, textDecoration:"none"}}>
-          Full Platform →
-        </a>
+        <div style={{display:"flex", alignItems:"center", gap:12}}>
+          <CreditsBar isLoggedIn={isLoggedIn} credits={credits} plan={plan} userName={userName} />
+          <AuthButtons isLoggedIn={isLoggedIn} userName={userName} userEmail={userEmail} />
+        </div>
       </div>
+      <JavariWidget />
 
       <div style={{maxWidth:900, margin:"0 auto", padding:"28px 20px"}}>
         {/* Mission banner */}
