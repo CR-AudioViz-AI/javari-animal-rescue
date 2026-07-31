@@ -196,6 +196,22 @@ export default function AnimalRescuePage() {
       <JavariWidget />
 
       <div style={{maxWidth:900, margin:"0 auto", padding:"28px 20px"}}>
+        {/* Rescue Network - real directory + registration, not just the AI tools */}
+        <div style={{marginBottom:24, display:"grid", gridTemplateColumns:"1fr 1fr", gap:12}}>
+          <a href="/rescue/directory" style={{padding:"16px 20px", background:C.card,
+            border:"1px solid rgba(0,212,255,0.2)", borderRadius:10, textDecoration:"none",
+            color:C.text, display:"block"}}>
+            <div style={{fontWeight:800, fontSize:14, color:C.teal}}>🌐 Rescue Directory</div>
+            <div style={{fontSize:12, color:C.text2, marginTop:2}}>Find and connect with other rescues nationwide</div>
+          </a>
+          <a href="/rescue/register" style={{padding:"16px 20px", background:C.card,
+            border:"1px solid rgba(16,185,129,0.2)", borderRadius:10, textDecoration:"none",
+            color:C.text, display:"block"}}>
+            <div style={{fontWeight:800, fontSize:14, color:C.green}}>➕ Register Your Rescue</div>
+            <div style={{fontSize:12, color:C.text2, marginTop:2}}>Get your own page, directory listing, and monthly AI credits</div>
+          </a>
+        </div>
+
         {/* Mission banner */}
         <div style={{marginBottom:24, padding:"14px 18px",
           background:"rgba(16,185,129,0.08)", border:"1px solid rgba(16,185,129,0.2)",
