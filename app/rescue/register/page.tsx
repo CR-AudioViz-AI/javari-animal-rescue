@@ -47,13 +47,25 @@ export default function RegisterPage() {
     if (!authToken || !rescueId) return
     setBusy(true); setError(null)
     try {
+      // Fixed 2026-07-31: this used to call a local, duplicate Stripe
+      // integration built by mistake. Now calls a thin local proxy (no
+      // Stripe logic of its own) which forwards server-side to the ONE
+      // central payments endpoint every app uses - a direct browser call
+      // to craudiovizai.com would fail CORS, so the forward happens
+      // server-to-server instead.
       const res = await fetch('/api/rescues/billing/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
-        body: JSON.stringify({ rescue_id: rescueId, plan }),
+        body: JSON.stringify({
+          mode: 'rescue_plan',
+          rescueId,
+          rescuePlan: plan,
+          successUrl: `${window.location.origin}/rescue/manage?checkout=success`,
+          cancelUrl: `${window.location.origin}/rescue/manage?checkout=canceled`,
+        }),
       })
       const d = await res.json()
-      if (d.checkout_url) window.location.href = d.checkout_url
+      if (d.url) window.location.href = d.url
       else setError(d.error ?? 'Could not start checkout.')
     } finally { setBusy(false) }
   }
