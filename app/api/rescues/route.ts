@@ -1,8 +1,9 @@
 // app/api/rescues/route.ts
 // The real rescue network: directory search, registration, and single-rescue
-// lookup by slug - built directly into this app (its own entity, own repo,
-// own Vercel project) rather than depending on craudiovizai.com's copy,
-// while still using the same shared Supabase project every app uses.
+// lookup by slug. Reverted 2026-07-31: featured placement is derived from
+// the owning user's REAL existing platform subscription (user_subscriptions
+// .plan_tier), not a separate rescue-specific plan - a rescue registered by
+// someone on Pro or Business is featured; there is no separate purchase.
 // CR AudioViz AI · EIN 39-3646201 · July 31, 2026
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
@@ -16,13 +17,14 @@ function sb() {
   return createClient(SB_URL, SB_SVC, { auth: { persistSession: false } });
 }
 
+const FEATURED_TIERS = new Set(["pro", "business"]);
+
 export async function GET(req: NextRequest): Promise<NextResponse> {
   if (!SB_URL || !SB_SVC) return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
   const client = sb();
 
   const slug = req.nextUrl.searchParams.get("slug");
   if (slug) {
-    // Single rescue lookup - powers the public profile page.
     const { data, error } = await client.from("dog_rescues")
       .select("*").eq("slug", slug).eq("active", true).maybeSingle();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -30,28 +32,34 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ rescue: data });
   }
 
-  // Directory search - featured (paid) rescues first, matching what their
-  // plan actually pays for, not a hidden or arbitrary ranking.
   const state = req.nextUrl.searchParams.get("state");
   let query = client.from("dog_rescues").select(
-    "id,name,slug,city,state,website,description,logo_url,cover_url,mission,animals_served,verified,plan"
+    "id,name,slug,city,state,website,description,logo_url,cover_url,mission,animals_served,verified,user_id"
   ).eq("active", true).eq("verified", true);
   if (state) query = query.eq("state", state);
 
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  const rescues = data ?? [];
 
-  const featuredPlans = new Set(["growth", "network"]);
-  const sorted = (data ?? []).sort((a, b) => {
-    const aFeatured = featuredPlans.has(a.plan) ? 1 : 0;
-    const bFeatured = featuredPlans.has(b.plan) ? 1 : 0;
-    return bFeatured - aFeatured;
-  });
+  // Look up the real subscription tier for each rescue's owner in one query,
+  // rather than N+1 lookups.
+  const ownerIds = [...new Set(rescues.map(r => r.user_id).filter(Boolean))];
+  const { data: subs } = ownerIds.length
+    ? await client.from("user_subscriptions").select("user_id, plan_tier, status").in("user_id", ownerIds)
+    : { data: [] as { user_id: string; plan_tier: string; status: string }[] };
+  const tierByUser = new Map((subs ?? []).filter(s => s.status === "active").map(s => [s.user_id, s.plan_tier]));
+
+  const withFeatured = rescues.map(r => ({
+    ...r,
+    featured: FEATURED_TIERS.has(tierByUser.get(r.user_id) ?? ""),
+  }));
+  const sorted = withFeatured.sort((a, b) => Number(b.featured) - Number(a.featured));
 
   return NextResponse.json({
     rescues: sorted,
-    disclosure: sorted.some(r => featuredPlans.has(r.plan))
-      ? "Rescues on our Growth or Network plan appear first in search results."
+    disclosure: sorted.some(r => r.featured)
+      ? "Rescues whose registered account is on the Pro or Business platform plan appear first in search results."
       : undefined,
   });
 }
@@ -76,6 +84,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 50)
     + "-" + Math.random().toString(36).slice(2, 6);
 
+  // Free, instant registration - no plan, no checkout. Directory features
+  // are computed at read time from the owner's real subscription above.
   const { data, error } = await client.from("dog_rescues").insert({
     user_id: user.id,
     name,
@@ -91,9 +101,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     nonprofit: !!body.nonprofit,
     verified: false,   // real verification is a manual/future step - never self-declared true
     active: true,
-    plan: "starter",
-    plan_status: "inactive",   // becomes active only once real payment succeeds
-    credits: 0,
   }).select("id, slug").single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
