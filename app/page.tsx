@@ -201,7 +201,7 @@ export default function AnimalRescuePage() {
           background:"rgba(16,185,129,0.08)", border:"1px solid rgba(16,185,129,0.2)",
           borderRadius:10, textAlign:"center"}}>
           <span style={{fontSize:13, color:C.green, fontWeight:700}}>
-            🆓 Free for animal rescues & shelters · Sign in with your CR AudioViz AI account
+            🐾 Low-cost, AI-supported tools for animal rescues · Sign in with your CR AudioViz AI account
           </span>
           <span style={{color:C.text2, fontSize:11, marginLeft:12}}>
             Powered by Javari AI · Part of the CR AudioViz AI social impact mission
@@ -304,7 +304,7 @@ export default function AnimalRescuePage() {
         <div style={{marginTop:32, display:"grid",
           gridTemplateColumns:"repeat(4,1fr)", gap:12}}>
           {[
-            {n:"FREE", d:"Always free for rescues"},
+            {n:"Low-Cost", d:"Affordable, credit-based access"},
             {n:"8 Tools", d:"All animal welfare needs"},
             {n:"AI-Powered", d:"Groq + Javari intelligence"},
             {n:"One Account", d:"Same login as the whole platform"},
