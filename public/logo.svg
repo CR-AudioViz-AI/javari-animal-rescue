@@ -1,0 +1,16 @@
+<svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="rescueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00D4FF"/>
+      <stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+  </defs>
+  <circle cx="24" cy="24" r="23" fill="#0a0f1a" stroke="url(#rescueGrad)" stroke-width="1.5"/>
+  <!-- Paw pad -->
+  <ellipse cx="24" cy="30" rx="9" ry="7" fill="url(#rescueGrad)"/>
+  <!-- Toes -->
+  <ellipse cx="14.5" cy="19" rx="3.6" ry="4.6" fill="url(#rescueGrad)"/>
+  <ellipse cx="21.5" cy="14.5" rx="3.6" ry="4.6" fill="url(#rescueGrad)"/>
+  <ellipse cx="28.5" cy="14.5" rx="3.6" ry="4.6" fill="url(#rescueGrad)"/>
+  <ellipse cx="35.5" cy="19" rx="3.6" ry="4.6" fill="url(#rescueGrad)"/>
+</svg>

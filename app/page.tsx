@@ -176,10 +176,13 @@ export default function AnimalRescuePage() {
         borderBottom:"1px solid rgba(0,212,255,0.12)", padding:"20px 24px",
         display:"flex", justifyContent:"space-between", alignItems:"center"}}>
         <div>
-          <h1 style={{margin:0, fontSize:22, fontWeight:900,
-            background:"linear-gradient(135deg,#00D4FF,#10B981)",
-            WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent"}}>
-            🐾 Javari Animal Rescue
+          <h1 style={{margin:0, fontSize:22, fontWeight:900, display:"flex", alignItems:"center", gap:10}}>
+            <img src="/logo.svg" alt="Javari Animal Rescue" width={28} height={28} />
+            <span style={{
+              background:"linear-gradient(135deg,#00D4FF,#10B981)",
+              WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent"}}>
+              Javari Animal Rescue
+            </span>
           </h1>
           <p style={{margin:"4px 0 0", color:C.text2, fontSize:12}}>
             AI-powered tools for shelters, rescues & foster networks · Powered by CR AudioViz AI
@@ -198,7 +201,7 @@ export default function AnimalRescuePage() {
           background:"rgba(16,185,129,0.08)", border:"1px solid rgba(16,185,129,0.2)",
           borderRadius:10, textAlign:"center"}}>
           <span style={{fontSize:13, color:C.green, fontWeight:700}}>
-            🆓 FREE for animal rescues & shelters · No account required
+            🆓 Free for animal rescues & shelters · Sign in with your CR AudioViz AI account
           </span>
           <span style={{color:C.text2, fontSize:11, marginLeft:12}}>
             Powered by Javari AI · Part of the CR AudioViz AI social impact mission
