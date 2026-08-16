@@ -5,6 +5,30 @@
 // CR AudioViz AI · EIN 39-3646201 · June 2026
 import { NextRequest, NextResponse } from 'next/server'
 import { requireCredits } from '@/lib/credits-check'
+
+async function callGemini(text: string): Promise<string> {
+  const key = process.env.GOOGLE_GEMINI_API_KEY ?? process.env.GEMINI_API_KEY ?? ''
+  if (!key) return ''
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${key}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text }] }],
+          generationConfig: { maxOutputTokens: 2048, temperature: 0.7 },
+        }),
+      },
+    )
+    if (!res.ok) return ''
+    const d = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] }
+    return d.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+  } catch {
+    return ''
+  }
+}
+
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 
@@ -40,6 +64,11 @@ async function callGroq(system: string, user: string): Promise<string> {
     const d = await res.json() as {choices?:{message:{content:string}}[]}
     if (d.choices?.[0]?.message?.content) return d.choices[0].message.content
   }
+  // 2026-08-15: Gemini was missing from the cascade entirely, so a Groq 429
+  // became a 500 the customer saw. Free tier two of the COST LAW.
+  const gem = await callGemini(system + '\n' + user)
+  if (gem.length > 20) return gem
+
   throw new Error('No AI provider available')
 }
 
