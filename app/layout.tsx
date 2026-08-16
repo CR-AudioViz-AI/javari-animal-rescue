@@ -19,7 +19,6 @@ export const metadata: Metadata = {
   description: 'Javari Animal Rescue — powered by Javari AI on the CR AudioViz AI platform',
   twitter: { card: 'summary_large_image', images: ['/og-image.png'] },
   openGraph: { images: [{ url: '/og-image.png', width: 1200, height: 630 }], title: 'Javari Animal Rescue', type: 'website' },
-  icons: { icon: '/logo.svg' },
 }
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
