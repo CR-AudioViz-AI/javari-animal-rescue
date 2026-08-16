@@ -5,7 +5,7 @@
 // 3. Redirect to login if unauthenticated
 // 4. App-specific public routes
 // Created: May 16, 2026
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, type NextFetchEvent } from 'next/server'
 import { track } from "@/lib/analytics/track"
 
 const PLATFORM_URL   = process.env.NEXT_PUBLIC_CENTRAL_API_URL ?? 'https://craudiovizai.com'
@@ -23,7 +23,7 @@ function isPublic(pathname: string): boolean {
   return PUBLIC_ROUTES.some(r => pathname === r || pathname.startsWith(r))
 }
 
-export async function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest, event: NextFetchEvent) {
   const { pathname } = req.nextUrl
 
   // Always allow public routes
@@ -49,7 +49,7 @@ export async function middleware(req: NextRequest) {
   // page down. Bots are counted rather than blocked, because a traffic figure
   // that silently includes AhrefsBot is a lie told to yourself.
   try {
-    void track({
+    event.waitUntil(track({
       path: req.nextUrl.pathname,
       method: req.method,
       userAgent: req.headers.get('user-agent') ?? '',
@@ -59,7 +59,7 @@ export async function middleware(req: NextRequest) {
       appId: req.nextUrl.hostname,
       sessionId: req.cookies.get('zsid')?.value ?? null,
       userId: null,
-    })
+    }))
   } catch {
     // Never let tracking break a req.
   }
