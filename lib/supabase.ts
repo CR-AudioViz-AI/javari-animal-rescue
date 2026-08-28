@@ -6,9 +6,10 @@
 // proven-correct pattern used across the rest of the platform.
 // CR AudioViz AI · EIN 39-3646201 · July 31, 2026
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { publishableKey, supabaseUrl } from "@craudioviz/platform-sdk";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
+const SUPABASE_URL = supabaseUrl();
+const SUPABASE_ANON_KEY = publishableKey();
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   console.error('[lib/supabase] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY');
