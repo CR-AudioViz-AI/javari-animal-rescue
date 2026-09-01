@@ -59,12 +59,20 @@ export default function RegisterPage() {
           </div>
         ) : (
           <div style={{ display: 'grid', gap: 12 }}>
-            {[
+            {/*
+              2026-09-01: typed to the STRING keys only. The form state also carries
+              `nonprofit: false`, so indexing it by an arbitrary key yields
+              'string | boolean' and a text input cannot take a boolean.
+              Naming the string fields explicitly means adding a field here without
+              adding it to state is a compile error, and the boolean checkbox stays
+              out of a list of text inputs where it never belonged.
+            */}
+            {([
               { k: 'name', l: 'Organization Name*' }, { k: 'city', l: 'City' }, { k: 'state', l: 'State' },
               { k: 'website', l: 'Website' }, { k: 'ein', l: 'EIN (if a registered nonprofit)' },
-            ].map(f => (
+            ] as { k: 'name'|'city'|'state'|'website'|'mission'|'description'|'ein'; l: string }[]).map(f => (
               <input key={f.k} placeholder={f.l}
-                value={form[f.k as keyof typeof form] ?? ''}
+                value={form[f.k] ?? ''}
                 onChange={e => setForm({ ...form, [f.k]: e.target.value })}
                 style={{ padding: 10, borderRadius: 8, background: 'rgba(16,28,52,0.9)',
                   border: '1px solid rgba(255,255,255,0.1)', color: '#F0F8FF' }} />
