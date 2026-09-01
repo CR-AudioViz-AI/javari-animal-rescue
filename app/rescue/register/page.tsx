@@ -64,7 +64,7 @@ export default function RegisterPage() {
               { k: 'website', l: 'Website' }, { k: 'ein', l: 'EIN (if a registered nonprofit)' },
             ].map(f => (
               <input key={f.k} placeholder={f.l}
-                value={(form as Record<string, string>)[f.k]}
+                value={form[f.k as keyof typeof form] ?? ''}
                 onChange={e => setForm({ ...form, [f.k]: e.target.value })}
                 style={{ padding: 10, borderRadius: 8, background: 'rgba(16,28,52,0.9)',
                   border: '1px solid rgba(255,255,255,0.1)', color: '#F0F8FF' }} />
