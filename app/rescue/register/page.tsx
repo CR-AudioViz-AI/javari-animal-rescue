@@ -47,7 +47,7 @@ export default function RegisterPage() {
 
         {!authToken && (
           <p style={{ color: '#F59E0B', fontSize: 13, marginBottom: 16 }}>
-            Please <a href="/login" style={{ color: '#00D4FF' }}>sign in</a> first to register a rescue.
+            Please <a href="https://craudiovizai.com/auth/login" style={{ color: '#00D4FF' }}>sign in</a> first to register a rescue.
           </p>
         )}
         {error && <p style={{ color: '#ef4444', fontSize: 13, marginBottom: 12 }}>{error}</p>}
