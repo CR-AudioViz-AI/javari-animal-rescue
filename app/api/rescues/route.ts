@@ -28,7 +28,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   if (slug) {
     const { data, error } = await client.from("dog_rescues")
       .select("*").eq("slug", slug).eq("active", true).maybeSingle();
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return NextResponse.json({ error: 'The request could not be completed.', code: 'INTERNAL_ERROR' }, { status: 500 });
     if (!data) return NextResponse.json({ error: "Rescue not found" }, { status: 404 });
     return NextResponse.json({ rescue: data });
   }
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   if (state) query = query.eq("state", state);
 
   const { data, error } = await query;
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ error: 'The request could not be completed.', code: 'INTERNAL_ERROR' }, { status: 500 });
   const rescues = data ?? [];
 
   // Look up the real subscription tier for each rescue's owner in one query,
@@ -104,6 +104,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     active: true,
   }).select("id, slug").single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ error: 'The request could not be completed.', code: 'INTERNAL_ERROR' }, { status: 500 });
   return NextResponse.json({ ok: true, id: data.id, slug: data.slug });
 }
