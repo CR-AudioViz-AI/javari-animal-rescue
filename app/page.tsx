@@ -172,7 +172,7 @@ export default function AnimalRescuePage() {
   return (
     <div style={{minHeight:"100vh", background:C.bg, color:C.text, fontFamily:"system-ui, sans-serif"}}>
       {/* Header */}
-      <div style={{background:"linear-gradient(135deg,rgba(0,212,255,0.08),rgba(16,185,129,0.08))",
+      <div data-app-chrome style={{background:"linear-gradient(135deg,rgba(0,212,255,0.08),rgba(16,185,129,0.08))",
         borderBottom:"1px solid rgba(0,212,255,0.12)", padding:"20px 24px",
         display:"flex", justifyContent:"space-between", alignItems:"center"}}>
         <div>
@@ -193,7 +193,7 @@ export default function AnimalRescuePage() {
           <AuthButtons isLoggedIn={isLoggedIn} userName={userName} userEmail={userEmail} />
         </div>
       </div>
-      <JavariWidget />
+      <div data-app-chrome style={{ display: 'contents' }}><JavariWidget /></div>
 
       <div style={{maxWidth:900, margin:"0 auto", padding:"28px 20px"}}>
         {/* Rescue Network - real directory + registration, not just the AI tools */}

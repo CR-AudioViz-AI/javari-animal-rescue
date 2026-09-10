@@ -7,10 +7,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "prebuild": "node scripts/audit-route-auth.mjs"
+    "prebuild": "node scripts/check-sdk-install.mjs && node scripts/audit-route-auth.mjs"
   },
   "dependencies": {
-    "@craudioviz/platform-sdk": "git+https://github.com/CR-AudioViz-AI/platform-sdk.git",
+    "@craudioviz/platform-sdk": "git+https://github.com/CR-AudioViz-AI/platform-sdk.git#31a7f6ddb0e3f79f7dbc5d16c83273221f872647",
     "@supabase/supabase-js": "^2.45.0",
     "framer-motion": "^11.5.4",
     "lucide-react": "^0.577.0",
@@ -21,7 +21,7 @@
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
-    "autoprefixer": "^0.1.0",
+    "autoprefixer": "^10.4.20",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
