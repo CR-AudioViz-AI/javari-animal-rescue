@@ -12,7 +12,7 @@
   "dependencies": {
     "@craudioviz/platform-sdk": "git+https://github.com/CR-AudioViz-AI/platform-sdk.git#31a7f6ddb0e3f79f7dbc5d16c83273221f872647",
     "@supabase/supabase-js": "^2.45.0",
-    "framer-motion": "^11.5.4",
+    "framer-motion": "^13.2.0",
     "lucide-react": "^0.577.0",
     "next": "^16.3.4",
     "react": "^18.3.1",
